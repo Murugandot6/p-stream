@@ -1,0 +1,39 @@
+# Name of the workflow
+name: Sync Fork
+
+# Controls when the workflow will run
+on:
+  # Runs on a schedule (this is set to run at the top of every hour)
+  schedule:
+    - cron: '0 * * * *'
+  
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  sync:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Step 1: Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v3
+        with:
+          # We need to set persist-credentials to false for the sync action to work correctly
+          persist-credentials: false
+
+      # Step 2: This is the action that performs the sync
+      - name: Sync fork to upstream repository
+        uses: repo-sync/github-sync@v2
+        with:
+          # The repository to sync from (the original PStream client)
+          source_repo: "https://github.com/pstream-io/client.git"
+          source_branch: "main"
+          
+          # The branch in your repository to update
+          destination_branch: "main"
+          
+          # The GitHub token is necessary to grant the action permission to push to your repository
+          github_token: ${{ secrets.GITHUB_TOKEN }}
